@@ -1,0 +1,40 @@
+start_year:              <YYYY>
+start_month:             <MM>
+start_day:               <DD>
+start_hour:              <HH>
+start_minute:            0
+start_second:            0
+nhours_fcst:             <NHOURS_FCST>
+fhrot:                   <FHROT>
+
+dt_atmos:                300
+restart_interval:        3 -1
+restart_fh:               
+
+quilting:                .true.
+quilting_restart:        .true.
+write_groups:            1
+write_tasks_per_group:   96
+itasks:                  1
+output_history:          .true.
+history_file_on_native_grid: .false.
+write_dopost:            .true.
+write_nsflip:            .true.
+num_files:               2
+fv3atm_output_dir:       ./FV3ATM_OUTPUT
+filename_base:           'atm' 'sfc'
+output_grid:             gaussian_grid
+output_file:             'netcdf_parallel' 'netcdf'
+zstandard_level:         0
+ideflate:                1
+quantize_mode:           'quantize_bitround'
+quantize_nsd:            14
+ichunk2d:                1536
+jchunk2d:                768
+ichunk3d:                1536
+jchunk3d:                768
+kchunk3d:                1
+imo:                     1536
+jmo:                     768
+output_fh:                <OUTPUT_FH>
+iau_offset:              0
