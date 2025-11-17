@@ -1,9 +1,8 @@
-1) run first 6-h forecast (save restart 3-h into forecast)
-2) calculate increment 
-wgrib2  FV3ATM_OUTPUT/GFSPRS.GrbF06 -match  ":(UGRD|VGRD|TMP|SPFH):(50|100|150|200|250|300|400|500|600|700|850|925|1000) mb:" -new_grid latlon 0:1440:0.25 90:721:-0.25 FV3ATM_OUTPUT/GFSPRS_0p25deg.GrbF06
-wgrib2  FV3ATM_OUTPUT/GFSPRS.GrbF06  -append -match "PRMSL" -new_grid latlon 0:1440:0.25 90:721:-0.25  FV3ATM_OUTPUT/GFSPRS_0p25deg.GrbF06
-wgrib2  FV3ATM_OUTPUT/GFSPRS.GrbF06  -append -match "PRES:surface" -new_grid latlon 0:1440:0.25 90:721:-0.25  FV3ATM_OUTPUT/GFSPRS_0p25deg.GrbF06
-/work/noaa/gsienkf/whitaker/miniconda3/bin/python calc_increment_graphcastgfs.py graphcastgfs.t00z.pgrb2.0p25.f006.20250915 FV3ATM_OUTPUT/GFSPRS_0p25deg.GrbF06 INPUT/fv3_increment.nc
-3) get graphcast forecast for 6-h valid time 
-   (e.g. aws s3 cp --no-sign-request s3://noaa-nws-graphcastgfs-pds/graphcastgfs.20250915/00/forecasts_13_levels/graphcastgfs.t00z.pgrb2.0p25.f006 graphcastgfs.t00z.pgrb2.0p25.f006.20250915), run replay using increment
-4) repeat 2 and 3 for fhr=12,18....240
+Run GFS control forecast with replay to NOAA Eagle Solo (graphcast).
+
+1) run first 6-h cold start forecast (save restart 3-h into forecast).
+    * run setup_rundir.sh with export do_iau=NO.
+    * sbatch run_forecast.sh to run 10 day forecast.
+    * copy FV3_RESTART and FV3ATM_OUTPUT to *_control.
+2) get graphcast forecasts using get_graphcast_forecast.sh.
+3) run setup_expdir.sh, then sbatch run_replay_forecast.sh.
