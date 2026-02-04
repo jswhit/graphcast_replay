@@ -28,9 +28,14 @@ HH=`echo $current_cycle | cut -c9-10`
 YYYY=`echo $current_cycle | cut -c1-4`
 MM=`echo $current_cycle | cut -c5-6`
 DD=`echo $current_cycle | cut -c7-8`
-/bin/rm -f input.nml model_configure
+/bin/rm -f input.nml model_configure diag_table
 /bin/cp -f input.nml.template input.nml
 /bin/cp -f model_configure.template model_configure
+/bin/cp -f diag_table_template diag_table
+sed -i -e "s/<YYYY>/${YYYY}/g" diag_table
+sed -i -e "s/<MM>/${MM}/g" diag_table
+sed -i -e "s/<DD>/${DD}/g" diag_table
+sed -i -e "s/<HH>/${HH}/g" diag_table
 sed -i -e "s/<YYYY>/${YYYY}/g" model_configure
 sed -i -e "s/<MM>/${MM}/g" model_configure
 sed -i -e "s/<DD>/${DD}/g" model_configure
@@ -60,7 +65,7 @@ echo "export current_cycle=${current_cycle}" > analdate.sh
 echo "export current_cycle_end=${current_cycle_end}" >> analdate.sh
 if [ $current_cycle -le $current_cycle_end ]  && [ $resubmit == 'YES' ]; then
    echo "current cycle is $current_cycle"
-   if [ $resubmit == 'true' ]; then
+   if [ $resubmit == 'YES' ]; then
       echo "resubmit script"
       sbatch --export=ALL run_control_forecast.sh
    fi
