@@ -20,7 +20,7 @@ filename_inc = sys.argv[3]
 if len(sys.argv) > 4:
     # parameters for spectral filter.
     waven = float(sys.argv[4])
-    power = int(10.0*(waven - np.floor(waven)))
+    power = int(np.round(10.0*(waven - np.floor(waven))))
     waven = np.floor(waven)
 else:
     # no spectral filter
