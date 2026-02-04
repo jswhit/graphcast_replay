@@ -21,7 +21,7 @@
 /
 
 &fv_core_nml
-  layout = 8,8
+  layout = 16,16
   io_layout = 1,1
   npx = 385
   npy = 385
@@ -68,11 +68,11 @@
   delt_max = 0.002
   ke_bg = 0.
   do_vort_damp = .true.
-  external_ic = .true.
+  external_ic = <EXTERNAL_IC> 
   external_eta = .true.
   gfs_phil = .false.
   nggps_ic = .true.
-  mountain = .false.
+  mountain = <MOUNTAIN> 
   ncep_ic = .false.
   d_con = 1.
   hord_mt = 5
@@ -88,7 +88,7 @@
   fill = .true.
   dwind_2d = .false.
   print_freq = 6
-  warm_start = .false.
+  warm_start = <WARM_START>
   no_dycore = .false.
   z_tracer = .true.
   agrid_vel_rst = .true.
@@ -134,6 +134,9 @@
   bl_mynn_edmf = 1
   bl_mynn_tkeadvect = .true.
   bl_mynn_edmf_mom = 1
+  tte_edmf     = .false.
+  cscale       = 1.0
+  do_ngw_ec    = .false.
   do_ugwp      = .false.
   do_tofd      = .false.
   gwd_opt      = 2
@@ -224,9 +227,7 @@
   rrtmgp_nGptsLW     = 128
   rrtmgp_nBandsLW    = 16
   rrtmgp_nBandsSW    = 14
-  doGP_cldoptics_LUT = .false.
   doGP_lwscat        = .false.
-  doGP_sgs_cnv       = .true.
   do_sppt      = .false.
   do_shum      = .false.
   do_skeb      = .false.
@@ -251,23 +252,23 @@
   nthresh      = 18
   ca_trigger   = .true.
   nspinup      = 1
-  iseed_ca     = 144208808
+  iseed_ca     = 144238808
   lndp_type   = 0
   n_var_lndp  = 0
   lcnorm  = .false.
   pert_mp = .false.
   pert_radtend = .false.
   pert_clds = .false.
-! iaufhrs      = 6,
-! iau_delthrs  = 6
-! iau_inc_files= ''
-! iau_drymassfixer = .false.
-! iau_filter_increments = .false.
+  iaufhrs      = <IAUFHRS>
+  iau_delthrs  = <IAUDELTHRS>
+  iau_inc_files= <IAUINCFILES>
+  iau_drymassfixer = .false.
+  iau_filter_increments = .false.
 /
 
 &land_iau_nml
   do_land_iau = .false.
-! land_iau_fhrs = 6,
+! land_iau_fhrs = 6
 ! land_iau_delthrs = 6
 ! land_iau_inc_files = 'sfc_inc',''
 ! lsoil_incr = 2
@@ -276,6 +277,7 @@
 ! land_iau_upd_slc = .true.
 ! land_iau_do_stcsmc_adjustment = .true.
 ! land_iau_min_T_increment = 0.0001
+! land_iau_min_SLC_increment = 0.000001
 /
 
 &cires_ugwp_nml
@@ -359,28 +361,28 @@
 /
 
 &namsfc
-  FNGLAC   = '/work/noaa/gsienkf/whitaker/global-workflow/fix/am/global_glacier.2x2.grb'
-  FNMXIC   = '/work/noaa/gsienkf/whitaker/global-workflow/fix/am/global_maxice.2x2.grb'
-  FNTSFC   = '/work/noaa/gsienkf/whitaker/global-workflow/fix/am/RTGSST.1982.2012.monthly.clim.grb'
-  FNSNOC   = '/work/noaa/gsienkf/whitaker/global-workflow/fix/am/global_snoclim.1.875.grb'
+  FNGLAC   = '<GWDIR>/fix/am/global_glacier.2x2.grb'
+  FNMXIC   = '<GWDIR>/fix/am/global_maxice.2x2.grb'
+  FNTSFC   = '<GWDIR>/fix/am/RTGSST.1982.2012.monthly.clim.grb'
+  FNSNOC   = '<GWDIR>/fix/am/global_snoclim.1.875.grb'
   FNZORC   = 'igbp'
-  FNALBC   = '/work/noaa/gsienkf/whitaker/global-workflow/fix/orog/C384/sfc/C384.mx025.snowfree_albedo.tileX.nc'
-  FNALBC2  = '/work/noaa/gsienkf/whitaker/global-workflow/fix/orog/C384/sfc/C384.mx025.facsf.tileX.nc'
-  FNAISC   = '/work/noaa/gsienkf/whitaker/global-workflow/fix/am/IMS-NIC.blended.ice.monthly.clim.grb'
-  FNTG3C   = '/work/noaa/gsienkf/whitaker/global-workflow/fix/orog/C384/sfc/C384.mx025.substrate_temperature.tileX.nc'
-  FNVEGC   = '/work/noaa/gsienkf/whitaker/global-workflow/fix/orog/C384/sfc/C384.mx025.vegetation_greenness.tileX.nc'
-  FNVETC   = '/work/noaa/gsienkf/whitaker/global-workflow/fix/orog/C384/sfc/C384.mx025.vegetation_type.tileX.nc'
-  FNSOTC   = '/work/noaa/gsienkf/whitaker/global-workflow/fix/orog/C384/sfc/C384.mx025.soil_type.tileX.nc'
-  FNSOCC   = '/work/noaa/gsienkf/whitaker/global-workflow/fix/orog/C384/sfc/C384.mx025.soil_color.tileX.nc'
-  FNSMCC   = '/work/noaa/gsienkf/whitaker/global-workflow/fix/am/global_soilmgldas.statsgo.t766.1536.768.grb'
-  FNMSKH   = '/work/noaa/gsienkf/whitaker/global-workflow/fix/am/global_slmask.t1534.3072.1536.grb'
+  FNALBC   = '<GWDIR>/fix/orog/C384/sfc/C384.mx025.snowfree_albedo.tileX.nc'
+  FNALBC2  = '<GWDIR>/fix/orog/C384/sfc/C384.mx025.facsf.tileX.nc'
+  FNAISC   = '<GWDIR>/fix/am/IMS-NIC.blended.ice.monthly.clim.grb'
+  FNTG3C   = '<GWDIR>/fix/orog/C384/sfc/C384.mx025.substrate_temperature.tileX.nc'
+  FNVEGC   = '<GWDIR>/fix/orog/C384/sfc/C384.mx025.vegetation_greenness.tileX.nc'
+  FNVETC   = '<GWDIR>/fix/orog/C384/sfc/C384.mx025.vegetation_type.tileX.nc'
+  FNSOTC   = '<GWDIR>/fix/orog/C384/sfc/C384.mx025.soil_type.tileX.nc'
+  FNSOCC   = '<GWDIR>/fix/orog/C384/sfc/C384.mx025.soil_color.tileX.nc'
+  FNSMCC   = '<GWDIR>/fix/am/global_soilmgldas.statsgo.t766.1536.768.grb'
+  FNMSKH   = '<GWDIR>/fix/am/global_slmask.t1534.3072.1536.grb'
   FNTSFA   = ''
   FNACNA   = ''
   FNSNOA   = ''
-  FNVMNC   = '/work/noaa/gsienkf/whitaker/global-workflow/fix/orog/C384/sfc/C384.mx025.vegetation_greenness.tileX.nc'
-  FNVMXC   = '/work/noaa/gsienkf/whitaker/global-workflow/fix/orog/C384/sfc/C384.mx025.vegetation_greenness.tileX.nc'
-  FNSLPC   = '/work/noaa/gsienkf/whitaker/global-workflow/fix/orog/C384/sfc/C384.mx025.slope_type.tileX.nc'
-  FNABSC   = '/work/noaa/gsienkf/whitaker/global-workflow/fix/orog/C384/sfc/C384.mx025.maximum_snow_albedo.tileX.nc'
+  FNVMNC   = '<GWDIR>/fix/orog/C384/sfc/C384.mx025.vegetation_greenness.tileX.nc'
+  FNVMXC   = '<GWDIR>/fix/orog/C384/sfc/C384.mx025.vegetation_greenness.tileX.nc'
+  FNSLPC   = '<GWDIR>/fix/orog/C384/sfc/C384.mx025.slope_type.tileX.nc'
+  FNABSC   = '<GWDIR>/fix/orog/C384/sfc/C384.mx025.maximum_snow_albedo.tileX.nc'
   LDEBUG   = .false.
   FSMCL(2) = 99999
   FSMCL(3) = 99999
@@ -408,6 +410,7 @@
 
 &nam_stochy
   STOCHINI=.false.,
+  new_lscale=.false.,
   skeb = 0
   iseed_skeb = 0
   skeb_tau = -999.
