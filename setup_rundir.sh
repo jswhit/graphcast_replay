@@ -60,7 +60,7 @@ export FHZERO=3
 export FHOUT_HF=0
 export FHMAX_HF=0
 
-# C384/Ursa
+# C384/Ursa 9 nodes
 export layout_x=16
 export layout_y=16
 export WRITE_GROUP=1
