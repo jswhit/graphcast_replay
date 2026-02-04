@@ -60,12 +60,12 @@ export FHZERO=3
 export FHOUT_HF=0
 export FHMAX_HF=0
 
-# C384
-export layout_x=8
-export layout_y=8
+# C384/Ursa
+export layout_x=16
+export layout_y=16
 export WRITE_GROUP=1
-export WRTTASK_PER_GROUP=96   
-export ATMPETS=480    
+export WRTTASK_PER_GROUP=192  
+export ATMPETS=1728   
 export ATMTHREADS=1
 
 export DATA=$PWD
