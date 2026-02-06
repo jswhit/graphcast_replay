@@ -1,5 +1,5 @@
 #!/bin/sh
-#SBATCH -t 06:00:00
+#SBATCH -t 08:00:00
 #SBATCH -A gsienkf 
 #SBATCH -N 9
 #SBATCH --ntasks-per-node=192
@@ -53,6 +53,7 @@ while [ $fh -le $FHMAX ]; do
   /bin/cp FV3ATM_OUTPUT/GFSFLX.Grb${charfhr2} FV3ATM_OUTPUT/GFSFLX.Grb${charfhr2}.orig
   # get graphcast forecast (must prefetch since aws not accessible from compute nodes).
   #aws s3 cp --no-sign-request s3://noaa-nws-graphcastgfs-pds/graphcastgfs.${YYYYMMDD}/${HH}/forecasts_13_levels/graphcastgfs.t${HH}z.pgrb2.0p25.${charfhr3} graphcastgfs.t${HH}z.pgrb2.0p25.${charfhr3}.${YYYYMMDD}
+  #sbatch --wait --export=current_cycle=${current_cycle} get_graphcast_fcst.sh
   # interpolate UFS forecast to 0.25 deg grid
   wgrib2  FV3ATM_OUTPUT/GFSPRS.Grb${charfhr2} -match  ":(UGRD|VGRD|TMP|HGT|SPFH):(50|100|150|200|250|300|400|500|600|700|850|925|1000) mb:" -new_grid latlon 0:1440:0.25 90:721:-0.25 FV3ATM_OUTPUT/GFSPRS_0p25deg.Grb${charfhr2}
   wgrib2  FV3ATM_OUTPUT/GFSPRS.Grb${charfhr2}  -append -match "PRMSL" -new_grid latlon 0:1440:0.25 90:721:-0.25  FV3ATM_OUTPUT/GFSPRS_0p25deg.Grb${charfhr2}
@@ -141,6 +142,7 @@ while [ $fh -le $FHMAX ]; do
   wgrib2  FV3ATM_OUTPUT/GFSPRS.Grb${charfhr2}  -append -match "PRES:surface" -new_grid latlon 0:1440:0.25 90:721:-0.25  FV3ATM_OUTPUT/GFSPRScorr_0p25deg.Grb${charfhr2}
   fh=$[$fh+$FHINC]
 done
+/bin/rm -f graphcast*${YYYYMMDD}
 /bin/rm -rf $current_cycle
 /bin/mv -f FV3ATM_OUTPUT ${current_cycle}
 current_cycle=`incdate $current_cycle 24`
@@ -150,6 +152,8 @@ if [ $current_cycle -le $current_cycle_end ]  && [ $resubmit == 'YES' ]; then
    echo "current cycle is $current_cycle"
    if [ $resubmit == 'YES' ]; then
       echo "resubmit script"
-      sbatch --export=ALL run_replay_forecast.sh
+      #sbatch run_replay_forecast.sh
+      # this job will submit run_replay_forecast.sh
+      sbatch --export=current_cycle=${current_cycle} get_graphcast_fcst.sh
    fi
 fi
