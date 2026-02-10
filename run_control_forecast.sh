@@ -9,6 +9,7 @@
 #SBATCH -o run_control_forecast.out
 NWROOT=/scratch3/NCEPDEV/da/${USER}
 export HOMEgfs=${NWROOT}/global-workflow
+module purge
 source $HOMEgfs/dev/ush/load_modules.sh ufswm
 ICSDIR="${NWROOT}/gfsv17_c384ics" # from gfsv17 parallel
 cuberes=384
