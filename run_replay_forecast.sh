@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash -l
 #SBATCH -t 08:00:00
 #SBATCH -A gsienkf 
 #SBATCH -N 9
@@ -8,6 +8,10 @@
 #SBATCH -e run_replay_forecast.err
 #SBATCH -o run_replay_forecast.out
 export HOMEgfs=/scratch3/NCEPDEV/da/${USER}/global-workflow
+#source "${HOMEgfs}/ush/module-setup.sh"
+#source /apps/lmod/lmod/init/bash
+#export LMOD_SYSTEM_DEFAULT_MODULES=lmod
+#module reset
 source $HOMEgfs/dev/ush/load_modules.sh ufswm
 unset PYTHONPATH
 # python env needs pygrib, pyspharm, netcdf4
@@ -17,6 +21,7 @@ ICSDIR="${NWROOT}/gfsv17_c384ics" # from gfsv17 parallel
 resubmit="YES"
 #current_cycle=${current_cycle:-"2025120100"}
 source $PWD/analdate.sh
+echo "current cycle $current_cycle"
 export NODES=$SLURM_NNODES
 export corespernode=$SLURM_CPUS_ON_NODE
 export OMP_NUM_THREADS=1
@@ -42,6 +47,7 @@ mkdir FV3ATM_OUTPUT
 /bin/cp -f $NWROOT/graphcast_replay_control_C${cuberes}/${current_cycle}/GFSPRS.GrbF06 FV3ATM_OUTPUT
 if [ $? -ne 0 ]; then
   echo "FH=6 control forecast not available, stopping.."	   
+  ls -l  $NWROOT/graphcast_replay_control_C${cuberes}/${current_cycle}/GFSPRS.GrbF06
   exit 1
 fi
 /bin/cp -f $NWROOT/graphcast_replay_control_C${cuberes}/${current_cycle}/GFSFLX.GrbF06 FV3ATM_OUTPUT

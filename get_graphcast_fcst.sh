@@ -1,5 +1,5 @@
 #!/bin/sh
-#SBATCH -t 00:30:00
+#SBATCH -t 01:00:00
 #SBATCH -A da-cpu
 #SBATCH -n 1
 #SBATCH -p u1-service
@@ -23,4 +23,6 @@ while [ $fh -le $FHMAX ]; do
   aws s3 cp --no-sign-request s3://noaa-nws-graphcastgfs-pds/graphcastgfs.${YYYYMMDD}/${HH}/forecasts_13_levels/graphcastgfs.t${HH}z.pgrb2.0p25.${charfhr3} graphcastgfs.t${HH}z.pgrb2.0p25.${charfhr3}.${YYYYMMDD}
   fh=$[$fh+$FHINC]
 done
-sbatch --export=ALL run_replay_forecast.sh
+module purge
+echo "YES" > submit_forecast
+#sbatch --export=NONE run_replay_forecast.sh
