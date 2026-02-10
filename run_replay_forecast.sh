@@ -18,7 +18,6 @@ unset PYTHONPATH
 NWROOT=/scratch3/NCEPDEV/da/Jeffrey.Whitaker
 python_exe=${NWROOT}/miniforge/bin/python
 ICSDIR="${NWROOT}/gfsv17_c384ics" # from gfsv17 parallel
-resubmit="YES"
 #current_cycle=${current_cycle:-"2025120100"}
 source $PWD/analdate.sh
 echo "current cycle $current_cycle"
@@ -135,6 +134,7 @@ while [ $fh -le $FHMAX ]; do
   sh ./runmpi 
   if [ $? -ne 0 ]; then
     echo "forecast failed, stopping.."	   
+    echo "YES" > submit_forecast # resubmit
     exit 1
   fi
   # regenerate 0.25 degree grib files after IAU increment applied (middle/end of corrector segment).
@@ -154,12 +154,8 @@ done
 current_cycle=`incdate $current_cycle 24`
 echo "export current_cycle=${current_cycle}" > analdate.sh
 echo "export current_cycle_end=${current_cycle_end}" >> analdate.sh
-if [ $current_cycle -le $current_cycle_end ]  && [ $resubmit == 'YES' ]; then
+if [ $current_cycle -le $current_cycle_end ]; then
    echo "current cycle is $current_cycle"
-   if [ $resubmit == 'YES' ]; then
-      echo "resubmit script"
-      #sbatch run_replay_forecast.sh
-      # this job will submit run_replay_forecast.sh
-      sbatch --export=current_cycle=${current_cycle} get_graphcast_fcst.sh
-   fi
+   # this job will get graphcast forecasts for next time
+   sbatch --export=current_cycle=${current_cycle} get_graphcast_fcst.sh
 fi
