@@ -151,6 +151,8 @@ done
 /bin/rm -f graphcast*${YYYYMMDD}
 /bin/rm -rf $current_cycle
 /bin/mv -f FV3ATM_OUTPUT ${current_cycle}
+/bin/rm -rf FV3_RESTART
+mkdir FV3_RESTART
 current_cycle=`incdate $current_cycle 24`
 echo "export current_cycle=${current_cycle}" > analdate.sh
 echo "export current_cycle_end=${current_cycle_end}" >> analdate.sh

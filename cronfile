@@ -1,0 +1,2 @@
+# run every 5 minutes
+*/5 * * * * cd /scratch3/NCEPDEV/da/Jeffrey.Whitaker/graphcast_replay_C384; bash -l ./submit_fcst.sh >> submit_fcst.out
