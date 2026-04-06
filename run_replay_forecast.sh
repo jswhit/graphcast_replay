@@ -1,6 +1,6 @@
 #!/bin/bash -l
 #SBATCH -t 08:00:00
-#SBATCH -A gsienkf 
+#SBATCH -A da-cpu  
 #SBATCH -N 9
 #SBATCH --ntasks-per-node=192
 #SBATCH -p u1-compute
@@ -49,22 +49,20 @@ if [ $? -ne 0 ]; then
   ls -l  $NWROOT/graphcast_replay_control_C${cuberes}/${current_cycle}/GFSPRS.GrbF06
   exit 1
 fi
-/bin/cp -f $NWROOT/graphcast_replay_control_C${cuberes}/${current_cycle}/GFSFLX.GrbF06 FV3ATM_OUTPUT
+#/bin/cp -f $NWROOT/graphcast_replay_control_C${cuberes}/${current_cycle}/GFSFLX.GrbF06 FV3ATM_OUTPUT
 while [ $fh -le $FHMAX ]; do
   charfhr3="f"`printf %03i $fh`
   charfhr2="F"`printf %02i $fh`
   # save predictor segment forecast grib file.
   /bin/cp FV3ATM_OUTPUT/GFSPRS.Grb${charfhr2} FV3ATM_OUTPUT/GFSPRS.Grb${charfhr2}.orig
   /bin/cp FV3ATM_OUTPUT/GFSFLX.Grb${charfhr2} FV3ATM_OUTPUT/GFSFLX.Grb${charfhr2}.orig
-  # get graphcast forecast (must prefetch since aws not accessible from compute nodes).
-  #aws s3 cp --no-sign-request s3://noaa-nws-graphcastgfs-pds/graphcastgfs.${YYYYMMDD}/${HH}/forecasts_13_levels/graphcastgfs.t${HH}z.pgrb2.0p25.${charfhr3} graphcastgfs.t${HH}z.pgrb2.0p25.${charfhr3}.${YYYYMMDD}
-  #sbatch --wait --export=current_cycle=${current_cycle} get_graphcast_fcst.sh
   # interpolate UFS forecast to 0.25 deg grid
   wgrib2  FV3ATM_OUTPUT/GFSPRS.Grb${charfhr2} -match  ":(UGRD|VGRD|TMP|HGT|SPFH):(50|100|150|200|250|300|400|500|600|700|850|925|1000) mb:" -new_grid latlon 0:1440:0.25 90:721:-0.25 FV3ATM_OUTPUT/GFSPRS_0p25deg.Grb${charfhr2}
   wgrib2  FV3ATM_OUTPUT/GFSPRS.Grb${charfhr2}  -append -match "PRMSL" -new_grid latlon 0:1440:0.25 90:721:-0.25  FV3ATM_OUTPUT/GFSPRS_0p25deg.Grb${charfhr2}
   wgrib2  FV3ATM_OUTPUT/GFSPRS.Grb${charfhr2}  -append -match "PRES:surface" -new_grid latlon 0:1440:0.25 90:721:-0.25  FV3ATM_OUTPUT/GFSPRS_0p25deg.Grb${charfhr2}
   # calculate replay increment on 0.25 deg grid
-  ${python_exe} calc_increment_graphcastgfs_filt.py graphcastgfs.t${HH}z.pgrb2.0p25.${charfhr3}.${YYYYMMDD} FV3ATM_OUTPUT/GFSPRS_0p25deg.Grb${charfhr2} INPUT/fv3_increment.nc $WAVEN_FILT
+  /bin/rm -f INPUT/fv3_increment.nc
+  ${python_exe} calc_increment_graphcastgfs_filt.py graphcastgfs.t${HH}z.pgrb2.0p25.${charfhr3}.${YYYYMMDD} FV3ATM_OUTPUT/GFSPRS_0p25deg.Grb${charfhr2} INPUT/fv3_increment.nc 1 $WAVEN_FILT
   if [ $? -ne 0 ]; then
     echo "calc_increment failed, stopping.."	   
     exit 1
@@ -153,11 +151,13 @@ done
 /bin/mv -f FV3ATM_OUTPUT ${current_cycle}
 /bin/rm -rf FV3_RESTART
 mkdir FV3_RESTART
+sbatch --export=current_cycle=${current_cycle} grb1p00.sh
+sbatch --export=current_cycle=${current_cycle} grbimerg.sh
 current_cycle=`incdate $current_cycle 24`
 echo "export current_cycle=${current_cycle}" > analdate.sh
 echo "export current_cycle_end=${current_cycle_end}" >> analdate.sh
 if [ $current_cycle -le $current_cycle_end ]; then
    echo "current cycle is $current_cycle"
    # this job will get graphcast forecasts for next time
-   sbatch --export=current_cycle=${current_cycle} get_graphcast_fcst.sh
+   sbatch --export=current_cycle=${current_cycle} get_aigfs_fcst.sh
 fi

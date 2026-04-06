@@ -17,9 +17,10 @@ kap1 = kap + 1.0
 filename_gcast = sys.argv[1]
 filename_gfs = sys.argv[2]
 filename_inc = sys.argv[3]
-if len(sys.argv) > 4:
+use_q_inc = bool(int(sys.argv[4]))
+if len(sys.argv) > 5:
     # parameters for spectral filter.
-    waven = float(sys.argv[4])
+    waven = float(sys.argv[5])
     power = int(np.round(10.0*(waven - np.floor(waven))))
     waven = np.floor(waven)
 else:
@@ -45,7 +46,10 @@ u, plevs = read_array(grbs,'u')
 v, plevs = read_array(grbs,'v')
 q, plevs = read_array(grbs,'q')
 
-grb_mslp = grbs.select(shortName='prmsl')[0]
+try:
+    grb_mslp = grbs.select(shortName='prmsl')[0]
+except:
+    grb_mslp = grbs.select(shortName='msl')[0]
 lats, lons = grb_mslp.latlons()
 
 # read 0.25 degree GFS forecast data
@@ -54,7 +58,10 @@ t2, plevs2 = read_array(grbs, 't', levs=plevs)
 u2, plevs2 = read_array(grbs, 'u', levs=plevs)
 v2, plevs2 = read_array(grbs, 'v', levs=plevs)
 q2, plevs2 = read_array(grbs, 'q', levs=plevs)
-grb_mslp2 = grbs.select(shortName='prmsl')[0]
+try:
+    grb_mslp2 = grbs.select(shortName='prmsl')[0]
+except:
+    grb_mslp2 = grbs.select(shortName='msl')[0]
 lats2, lons2 = grb_mslp2.latlons()
 if np.max(np.abs(lats2-lats)) > 1.e-4 or np.max(np.abs(lons2-lons)) > 1.e-4:
     print('max diff lats,lons',(np.abs(lats2-lats)).max(), (np.abs(lons2-lons)).max())
@@ -86,6 +93,9 @@ v_inc = v-v2
 print('u_inc min/max',u_inc.min(),u_inc.max())
 print('v_inc min/max',v_inc.min(),v_inc.max())
 print('t_inc min/max',t_inc.min(),t_inc.max())
+if use_q_inc:
+    q_inc = q-q2
+    print('q_inc min/max',q_inc.min(),q_inc.max())
 
 #import matplotlib
 #matplotlib.use('agg')
@@ -125,15 +135,20 @@ if waven > 0:
         t_inc[k] = sp.spectogrd(gaufilt*t_inc_spec)
         vrt_inc_spec, div_inc_spec = sp.getvrtdivspec(u_inc[k],v_inc[k])
         u_inc[k], v_inc[k] = sp.getuv(gaufilt*vrt_inc_spec, gaufilt*div_inc_spec)
+        if use_q_inc:
+            q_inc_spec = sp.grdtospec(q_inc[k])
+            q_inc[k] = sp.spectogrd(gaufilt*q_inc_spec)
     print('spectrally filtering increments with a del**%s filter, wavenumber e-folding %s...' % (2*power,int(waven)))
     print('after filtering...')
     print('u_inc min/max',u_inc.min(),u_inc.max())
     print('v_inc min/max',v_inc.min(),v_inc.max())
     print('t_inc min/max',t_inc.min(),t_inc.max())
+    if use_q_inc: print('q_inc min/max',q_inc.min(),q_inc.max())
 
 u_inc = extend_array(u_inc)
 v_inc = extend_array(v_inc)
 t_inc = extend_array(t_inc)
+if use_q_inc: q_inc = extend_array(q_inc)
 
 def get_indices_slope(press_target, press_input):
     log_press_target = np.log(press_target) # log pressure vert interp
@@ -158,6 +173,7 @@ below, above, slope = get_indices_slope(press_target, press_data)
 u_inc_out = vert_interp(u_inc, below, above, slope)
 v_inc_out = vert_interp(v_inc, below, above, slope)
 t_inc_out = vert_interp(t_inc, below, above, slope)
+if use_q_inc: q_inc_out = vert_interp(q_inc, below, above, slope)
 
 # write out to netcdf file 
 
@@ -201,14 +217,19 @@ lev[:] = np.arange(nlevsout)+1
 ilev[:] = np.arange(nlevsout+1)+1
 zlib = True # compress 3d vars?
 u_inc = nc.createVariable('u_inc',np.float32,('lev','lat','lon'),zlib=zlib)
-v_inc = nc.createVariable('v_inc',np.float32,('lev','lat','lon'),zlib=zlib)
-tmp_inc = nc.createVariable('T_inc',np.float32,('lev','lat','lon'),zlib=zlib)
 inc = taper_vert*u_inc_out[:]
 print('u increment min/max',inc.min(), inc.max())
 u_inc[:] = inc[:,::-1,:] # flip lats so they go from S to N
+v_inc = nc.createVariable('v_inc',np.float32,('lev','lat','lon'),zlib=zlib)
 inc = taper_vert*v_inc_out[:]
 print('v increment min/max',inc.min(), inc.max())
 v_inc[:] = inc[:,::-1,:]
+tmp_inc = nc.createVariable('T_inc',np.float32,('lev','lat','lon'),zlib=zlib)
 inc = taper_vert*t_inc_out[:]
 print('t increment min/max',inc.min(), inc.max())
 tmp_inc[:] = inc[:,::-1,:]
+if use_q_inc: 
+    q_inc = nc.createVariable('q_inc',np.float32,('lev','lat','lon'),zlib=zlib)
+    inc = taper_vert*q_inc_out[:]
+    print('q increment min/max',inc.min(), inc.max())
+    q_inc[:] = inc[:,::-1,:] # flip lats so they go from S to N

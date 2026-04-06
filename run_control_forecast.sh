@@ -1,6 +1,6 @@
 #!/bin/sh
 #SBATCH -t 03:00:00
-#SBATCH -A da-cpu
+#SBATCH -A da-cpu   
 #SBATCH -N 9
 #SBATCH --ntasks-per-node=192
 #SBATCH -p u1-compute
@@ -56,9 +56,17 @@ mkdir INPUT
 pushd INPUT
 ln -fs $ICSDIR/gdas.$YYYYMMDD/$HH/model/atmos/input/C$cuberes/gfs*nc .
 ln -fs $ICSDIR/gdas.$YYYYMMDD/$HH/model/atmos/input/C$cuberes/sfc*nc .
+if [ $? -ne 0 ]; then
+  echo "no initial conditions,  stopping.."	   
+  exit 1
+fi
 popd
 mkdir -p FV3ATM_OUTPUT
 sh ./runmpi 
+if [ $? -ne 0 ]; then
+  echo "forecast failed, stopping.."	   
+  exit 1
+fi
 /bin/rm -rf $current_cycle
 /bin/mv -f FV3ATM_OUTPUT ${current_cycle}
 current_cycle=`incdate $current_cycle 24`
